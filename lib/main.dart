@@ -1,3 +1,4 @@
+import 'package:bug/task_checkbox.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -103,6 +104,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
+            ),
+            TaskCheckbox(value: true,
+              onChanged: (complete) async {
+                // do nothing
+              },
             ),
           ],
         ),
