@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,7 +28,7 @@ import 'package:flutter/material.dart';
 ///
 ///  * [CheckboxListTile], which combines this widget with a [ListTile] so that
 ///    you can give the checkbox a label.
-///  * [Switch], a widget with semantics similar to [Checkbox].
+///  * [Switch], a widget with semantics similar to [TaskCheckbox].
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
 ///  * <https://material.io/design/components/selection-controls.html#checkboxes>
@@ -60,6 +60,7 @@ class TaskCheckbox extends StatefulWidget {
     this.focusColor,
     this.hoverColor,
     this.materialTapTargetSize,
+    this.visualDensity,
     this.focusNode,
     this.autofocus = false,
   }) : assert(tristate != null),
@@ -132,6 +133,16 @@ class TaskCheckbox extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// Defines how compact the checkbox's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
+
   /// The color for the checkbox's [Material] when it has the input focus.
   final Color focusColor;
 
@@ -145,7 +156,7 @@ class TaskCheckbox extends StatefulWidget {
   final bool autofocus;
 
   /// The width of a checkbox widget.
-  static const double width = 40.0;
+  static const double width = 18.0;
 
   @override
   _TaskCheckboxState createState() => _TaskCheckboxState();
@@ -159,8 +170,7 @@ class _TaskCheckboxState extends State<TaskCheckbox> with TickerProviderStateMix
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
   }
 
@@ -184,7 +194,7 @@ class _TaskCheckboxState extends State<TaskCheckbox> with TickerProviderStateMix
 
   Action _createAction() {
     return CallbackAction(
-      SelectAction.key,
+      ActivateAction.key,
       onInvoke: _actionHandler,
     );
   }
@@ -216,6 +226,7 @@ class _TaskCheckboxState extends State<TaskCheckbox> with TickerProviderStateMix
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }
+    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     return FocusableActionDetector(
       actions: _actionMap,
@@ -316,9 +327,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kEdgeSize = TaskCheckbox.width;
-const Radius _kEdgeRadius = Radius.circular(8);
+const Radius _kEdgeRadius = Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
-const double _checkStrokeWidth = 4.0;
 
 class _RenderCheckbox extends RenderToggleable {
   _RenderCheckbox({
@@ -391,7 +401,7 @@ class _RenderCheckbox extends RenderToggleable {
     return Paint()
       ..color = checkColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _checkStrokeWidth;
+      ..strokeWidth = _kStrokeWidth;
   }
 
   void _drawBorder(Canvas canvas, RRect outer, double t, Paint paint) {
@@ -443,7 +453,7 @@ class _RenderCheckbox extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
+    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset);
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
         ? position.value
